@@ -45,7 +45,7 @@ SCRIPTS=(
     "update_scripts.sh"        # 更新脚本
     "update_ui.sh"             # 控制面板安装/更新/检查
     "menu.sh"                  # 主菜单
-    "uninstall.sh"             # Uninstall
+    "uninstall.sh"             # 卸载整个脚本
 )
 
 # 下载并设置单个脚本，带重试和日志记录逻辑
@@ -170,8 +170,8 @@ show_menu() {
     echo -e "${GREEN}8. 常用命令${NC}"
     echo -e "${GREEN}9. 更新脚本${NC}"
     echo -e "${GREEN}10. 更新控制面板${NC}"
+    echo -e "${GREEN}11. 卸载整个脚本${NC}"
     echo -e "${GREEN}0. 退出${NC}"
-    echo -e "${GREEN}11. Uninstall${NC}"
     echo -e "${CYAN}=======================================${NC}"
 }
 
@@ -212,6 +212,7 @@ handle_choice() {
             ;;
         11)
             bash "$SCRIPT_DIR/uninstall.sh"
+            exit 0
             ;;
         0)
             exit 0
