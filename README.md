@@ -1,5 +1,7 @@
 # Sbshell
 
+## 精简版 仅用于OpenWRT
+
 ⚠️⚠️请注意禁止搬运到中国大陆，请遵守属地法律法律⚠️⚠️  
 Sbshell 是一款针对 官方sing-box 的辅助运行脚本，旨在让官方sing-box更方便使用：
 
@@ -17,11 +19,7 @@ Sbshell 是一款针对 官方sing-box 的辅助运行脚本，旨在让官方si
 - **面板更新**：支持clash系面板在线更新/切换。
 
 
-## 设备支持：
-
-目前支持系统为deiban/ubuntu/armbian以及openwrt！
-
-## 一键脚本：(请自行安装curl和bash，如果缺少的话)
+## 一键脚本：(已加入安装curl和bash的指令)
 ```
 opkg update 
 opkg install curl && bash
