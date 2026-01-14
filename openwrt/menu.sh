@@ -26,6 +26,7 @@ BASE_URL="https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshel
                                
 # 脚本列表
 SCRIPTS=(
+    "apply_firewall.sh"       # Apply firewall after sing-box start
     "check_environment.sh"     # 检查系统环境
     "install_singbox.sh"       # 安装 Sing-box
     "manual_input.sh"          # 手动输入配置
@@ -44,6 +45,7 @@ SCRIPTS=(
     "update_scripts.sh"        # 更新脚本
     "update_ui.sh"             # 控制面板安装/更新/检查
     "menu.sh"                  # 主菜单
+    "uninstall.sh"             # Uninstall
 )
 
 # 下载并设置单个脚本，带重试和日志记录逻辑
@@ -169,6 +171,7 @@ show_menu() {
     echo -e "${GREEN}9. 更新脚本${NC}"
     echo -e "${GREEN}10. 更新控制面板${NC}"
     echo -e "${GREEN}0. 退出${NC}"
+    echo -e "${GREEN}11. Uninstall${NC}"
     echo -e "${CYAN}=======================================${NC}"
 }
 
@@ -206,6 +209,9 @@ handle_choice() {
             ;;
         10)
             bash "$SCRIPT_DIR/update_ui.sh"
+            ;;
+        11)
+            bash "$SCRIPT_DIR/uninstall.sh"
             ;;
         0)
             exit 0

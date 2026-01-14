@@ -77,6 +77,7 @@ fi
 
 # 脚本列表
 SCRIPTS=(
+    "apply_firewall.sh"
     "check_environment.sh"
     "install_singbox.sh"
     "manual_input.sh"
@@ -95,6 +96,7 @@ SCRIPTS=(
     "update_scripts.sh"
     "update_ui.sh"
     "menu.sh"
+    "uninstall.sh"
 )
 
 # 下载并设置单个脚本，带重试逻辑
