@@ -25,7 +25,7 @@ Sbshell 是一款针对 官方sing-box 的辅助运行脚本，旨在让官方si
 ```
 opkg update 
 opkg install curl && bash
-bash <(curl -sL https://gh-proxy.com/https://raw.githubusercontent.com/qljsyph/sbshell/refs/heads/main/sbshall.sh)
+bash <(curl -sL https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/sbshall.sh)
 ```
 - 初始化运行结束，输入“**sb**”进入菜单
 。  
