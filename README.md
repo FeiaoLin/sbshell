@@ -22,7 +22,7 @@ Sbshell 是一款针对 官方sing-box 的辅助运行脚本，旨在让官方si
 ## 一键脚本：(已加入安装curl和bash的指令)
 ```
 opkg update 
-opkg install curl && bash
+opkg install curl bash && bash
 bash <(curl -sL https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/sbshall.sh)
 ```
 - 初始化运行结束，输入“**sb**”进入菜单
