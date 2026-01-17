@@ -48,11 +48,3 @@ bash <(curl -sL https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/
 
 **请查看[wiki](https://github.com/qljsyph/sbshell/wiki)**  
 **网络优化功能不懂的不要使用会影响游戏性**
-
-
-
-## Recent Changes
-- TProxy route table now forces loopback (lo) to avoid interface misbinding
-- output_tproxy now allows DNS (port 53) to prevent local DNS loop issues
-- Added IPv6 rule/route add/remove for consistent v6 handling
-- Firewall apply now validates sing-box config before writing rules
