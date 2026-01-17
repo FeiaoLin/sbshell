@@ -38,11 +38,11 @@ bash <(curl -sL https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/
 
 ## 适配配置文件：
 - fakeiptrpoxy:
-https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_fakeiptrpoxy12.json
+ https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_fakeiptrpoxy12.json
 - fakeiptun:
-https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_fakeiptun12.json
+ https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_fakeiptun12.json
 - trpoxy:
-https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_trpoxy12.json
+ https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_trpoxy12.json
 
 ## 其他问题：
 
