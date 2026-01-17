@@ -18,6 +18,13 @@ Sbshell 是一款针对 官方sing-box 的辅助运行脚本，旨在让官方si
 - **在线更新**：支持脚本在线更新，始终保持最新版本。
 - **面板更新**：支持clash系面板在线更新/切换。
 
+## 最近修改
+
+- TProxy 路由表回环强制使用 lo，避免与网口绑定出现断网
+- output_tproxy 直接放行 53 端口，降低本机 DNS 回环出错的概率
+- 启用/清理 IPv6 rule/route，避免 v6 流量路径不一致
+- 应用防火墙规则前增加 sing-box 配置检查，失败则跳过写规则
+
 
 ## 一键脚本：(已加入安装curl和bash的指令)
 ```
@@ -37,3 +44,9 @@ bash <(curl -sL https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/
 **网络优化功能不懂的不要使用会影响游戏性**
 
 
+
+## Recent Changes
+- TProxy route table now forces loopback (lo) to avoid interface misbinding
+- output_tproxy now allows DNS (port 53) to prevent local DNS loop issues
+- Added IPv6 rule/route add/remove for consistent v6 handling
+- Firewall apply now validates sing-box config before writing rules

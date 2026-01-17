@@ -10,7 +10,6 @@ MODE_FILE="/etc/sing-box/mode.conf"
 MAX_WAIT=15
 PROXY_FWMARK=1
 PROXY_ROUTE_TABLE=100
-INTERFACE=$(ip route show default | awk '/default/ {print $5; exit}')
 
 is_running() {
     if command -v pgrep >/dev/null 2>&1; then
@@ -23,9 +22,9 @@ is_running() {
 cleanup_tproxy() {
     nft list table inet sing-box >/dev/null 2>&1 && nft delete table inet sing-box
     ip rule del fwmark $PROXY_FWMARK lookup $PROXY_ROUTE_TABLE 2>/dev/null
-    if [ -n "$INTERFACE" ]; then
-        ip route del local default dev "$INTERFACE" table $PROXY_ROUTE_TABLE 2>/dev/null
-    fi
+    ip route del local default dev lo table $PROXY_ROUTE_TABLE 2>/dev/null
+    ip -6 rule del fwmark $PROXY_FWMARK lookup $PROXY_ROUTE_TABLE 2>/dev/null
+    ip -6 route del local ::/0 dev lo table $PROXY_ROUTE_TABLE 2>/dev/null
 }
 
 MODE=$(grep -oE '^MODE=.*' "$MODE_FILE" 2>/dev/null | cut -d'=' -f2)
@@ -50,6 +49,11 @@ done
 
 if ! is_running; then
     echo -e "${RED}sing-box is not running, skip firewall apply.${NC}"
+    exit 1
+fi
+
+if ! bash "$SCRIPT_DIR/check_config.sh"; then
+    echo -e "${RED}Config check failed, skip firewall apply.${NC}"
     exit 1
 fi
 
