@@ -36,7 +36,10 @@ bash <(curl -sL https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/
 。  
 - 防火墙仅支持nftables，不支持iptables。
 
-
+## 适配配置文件：
+fakeiptrpoxy:https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_fakeiptrpoxy12.json
+fakeiptun:https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_fakeiptun12.json
+trpoxy:https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_trpoxy12.json
 
 ## 其他问题：
 
