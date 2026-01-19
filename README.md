@@ -1,7 +1,7 @@
 # Sbshell Lite
 
-## 本项目为Sbshell的精简版，为sing-box裸核形式运行的辅助脚本，原作者为：https://github.com/qljsyph/sbshell。
-## 本项目代码由Codex编写并修改，针对OpenWRT精简了部分内容，并增加卸载脚本的功能。
+## 本项目为Sbshell的精简版，为sing-box裸核形式运行的辅助脚本，原作者为：https://github.com/qljsyph/sbshell
+## 本项目代码由Codex编写并修改，针对OpenWRT精简了部分内容，并增加卸载脚本的功能
 
 ⚠️⚠️请注意禁止搬运到中国大陆，请遵守属地法律法律⚠️⚠️  
 Sbshell 是一款针对 官方sing-box 的辅助运行脚本，旨在让官方sing-box更方便使用：
