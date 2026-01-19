@@ -1,6 +1,7 @@
 # Sbshell Lite
 
-## 本项目为Sbshell的精简版，为sing-box裸核形式运行的辅助脚本，原作者为：https://github.com/qljsyph/sbshell
+## 本项目为Sbshell的精简版，为sing-box裸核形式运行的辅助脚本，原作者为：<https://github.com/qljsyph/sbshell>
+
 ## 本项目代码由Codex编写并修改，针对OpenWRT精简了部分内容，并增加卸载脚本的功能
 
 ⚠️⚠️请注意禁止搬运到中国大陆，请遵守属地法律法律⚠️⚠️  
@@ -26,26 +27,28 @@ Sbshell 是一款针对 官方sing-box 的辅助运行脚本，旨在让官方si
 - 启用/清理 IPv6 rule/route，避免 v6 流量路径不一致
 - 应用防火墙规则前增加 sing-box 配置检查，失败则跳过写规则
 
-
 ## 一键脚本：(已加入安装curl和bash的指令)
+
 ```
 opkg update 
 opkg install curl bash && bash
 bash <(curl -sL https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/sbshall.sh)
 ```
+
 - 初始化运行结束，输入“**sb**”进入菜单
 。  
 - 防火墙仅支持nftables，不支持iptables。
 
-## 适配配置文件：
-- fakeiptrpoxy:
- https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_fakeiptrpoxy12.json
-- fakeiptun:
- https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_fakeiptun12.json
-- trpoxy:
- https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_trpoxy12.json
+## 适配配置文件
 
-## 其他问题：
+- fakeiptrpoxy:
+ <https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_fakeiptrpoxy12.json>
+- fakeiptun:
+ <https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_fakeiptun12.json>
+- trpoxy:
+ <https://gh-proxy.com/https://raw.githubusercontent.com/FeiaoLin/sbshell/refs/heads/main/config/config_trpoxy12.json>
+
+## 其他问题
 
 **请查看[wiki](https://github.com/qljsyph/sbshell/wiki)**  
 **网络优化功能不懂的不要使用会影响游戏性**
