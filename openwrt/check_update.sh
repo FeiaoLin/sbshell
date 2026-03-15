@@ -31,11 +31,27 @@ trap 'rm -rf "$WORK_DIR"' EXIT
 
 fetch_text() {
     local url="$1"
+    local body code i
+
     if command -v curl >/dev/null 2>&1; then
-        curl -fsSL -H "Accept: application/vnd.github+json" -H "User-Agent: sbshell" "$url"
+        for i in 1 2 3; do
+            body="$(curl -sSL -H "Accept: application/vnd.github+json" -H "User-Agent: sbshell/$i" -w $'\n%{http_code}' "$url")"
+            code="${body##*$'\n'}"
+            body="${body%$'\n'*}"
+            if [ "$code" = "200" ] && [ -n "$body" ]; then
+                echo "$body"
+                return 0
+            fi
+            sleep 2
+        done
+    fi
+
+    if command -v wget >/dev/null 2>&1; then
+        wget -qO- --header="Accept: application/vnd.github+json" --header="User-Agent: sbshell" "$url"
         return $?
     fi
-    wget -qO- --header="Accept: application/vnd.github+json" --header="User-Agent: sbshell" "$url"
+
+    return 1
 }
 
 download_file() {
