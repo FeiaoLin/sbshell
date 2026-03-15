@@ -54,7 +54,7 @@ fetch_text() {
                     return 0
                 fi
                 sleep 2
-            fi
+            done
         fi
 
         if command -v wget >/dev/null 2>&1; then
