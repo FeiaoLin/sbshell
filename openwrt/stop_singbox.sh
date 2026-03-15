@@ -11,10 +11,10 @@ SCRIPT_DIR="/etc/sing-box/scripts"
 # 停止 sing-box 服务
 stop_singbox() {
     echo -e "${CYAN}正在停止 sing-box 服务...${NC}"
-    /etc/init.d/sing-box stop
-    result=$?
-    if [ $result -ne 0 ]; then
-        echo -e "${CYAN}停止 sing-box 服务失败，返回码: $result${NC}"
+    /etc/init.d/sing-box stop >/dev/null 2>&1
+
+    if /etc/init.d/sing-box status 2>/dev/null | grep -q "running"; then
+        echo -e "${CYAN}停止 sing-box 服务失败，请检查日志${NC}"
     else
         echo -e "${GREEN}sing-box 已成功停止。${NC}"
     fi

@@ -67,6 +67,23 @@ prompt_user_input() {
     done
 }
 
+check_runtime_health() {
+    local mode
+    mode=$(grep -E '^MODE=' /etc/sing-box/mode.conf 2>/dev/null | sed 's/^MODE=//')
+
+    /etc/init.d/sing-box status 2>/dev/null | grep -q "running" || return 1
+
+    if [ "$mode" = "TProxy" ]; then
+        nft list table inet sing-box >/dev/null 2>&1 || return 1
+        ip rule show | grep -q "fwmark 0x1 lookup 100" || return 1
+        ip route show table 100 | grep -q "local default dev lo" || return 1
+    fi
+
+    curl -4 -sS -o /dev/null --max-time 10 "https://www.gstatic.com/generate_204" >/dev/null 2>&1 && return 0
+    curl -4 -sS -o /dev/null --max-time 10 "https://www.google.com" >/dev/null 2>&1 && return 0
+    return 1
+}
+
 read -rp "是否更换订阅地址？(y/n): " change_subscription
 if [[ "$change_subscription" =~ ^[Yy]$ ]]; then
     # 执行手动输入相关内容
@@ -133,11 +150,22 @@ else
     [ -f "/etc/sing-box/config.json.backup" ] && cp /etc/sing-box/config.json.backup /etc/sing-box/config.json
 fi
 
-# 重启sing-box并检查启动状态
-/etc/init.d/sing-box start
+# 重载 sing-box 并检查可用性，失败自动重试一次
+for attempt in 1 2; do
+    if [ "$attempt" -eq 1 ]; then
+        /etc/init.d/sing-box restart >/dev/null 2>&1
+    else
+        /etc/init.d/sing-box stop >/dev/null 2>&1
+        sleep 1
+        /etc/init.d/sing-box start >/dev/null 2>&1
+    fi
 
-if /etc/init.d/sing-box status | grep -q "running"; then
-    echo -e "${GREEN}sing-box 启动成功${NC}"
-else
-    echo -e "${RED}sing-box 启动失败${NC}"
-fi
+    sleep 2
+    if check_runtime_health; then
+        echo -e "${GREEN}sing-box 启动成功，新配置已生效${NC}"
+        exit 0
+    fi
+done
+
+echo -e "${RED}sing-box 已重试 2 次仍未通过健康检查，请执行: logread -e sing-box${NC}"
+exit 1
