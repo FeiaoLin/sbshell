@@ -29,27 +29,45 @@ fi
 mkdir -p "$WORK_DIR" || exit 1
 trap 'rm -rf "$WORK_DIR"' EXIT
 
+proxy_url() {
+    local raw="$1"
+    case "$raw" in
+        https://gh-proxy.com/*) echo "$raw" ;;
+        *) echo "https://gh-proxy.com/$raw" ;;
+    esac
+}
+
 fetch_text() {
     local url="$1"
-    local body code i
+    local body code i target proxy
 
-    if command -v curl >/dev/null 2>&1; then
-        for i in 1 2 3; do
-            body="$(curl -sSL -H "Accept: application/vnd.github+json" -H "User-Agent: sbshell/$i" -w $'\n%{http_code}' "$url")"
-            code="${body##*$'\n'}"
-            body="${body%$'\n'*}"
-            if [ "$code" = "200" ] && [ -n "$body" ]; then
-                echo "$body"
-                return 0
+    proxy="$(proxy_url "$url")"
+
+    for target in "$url" "$proxy"; do
+        if command -v curl >/dev/null 2>&1; then
+            for i in 1 2 3; do
+                body="$(curl -sSL -H "Accept: application/vnd.github+json" -H "User-Agent: sbshell/$i" -w $'\n%{http_code}' "$target")"
+                code="${body##*$'\n'}"
+                body="${body%$'\n'*}"
+                if [ "$code" = "200" ] && [ -n "$body" ]; then
+                    echo "$body"
+                    return 0
+                fi
+                sleep 2
             fi
-            sleep 2
-        done
-    fi
+        fi
 
-    if command -v wget >/dev/null 2>&1; then
-        wget -qO- --header="Accept: application/vnd.github+json" --header="User-Agent: sbshell" "$url"
-        return $?
-    fi
+        if command -v wget >/dev/null 2>&1; then
+            for i in 1 2 3; do
+                body="$(wget -qO- --header="Accept: application/vnd.github+json" --header="User-Agent: sbshell/$i" "$target" 2>/dev/null)"
+                if [ -n "$body" ]; then
+                    echo "$body"
+                    return 0
+                fi
+                sleep 2
+            done
+        fi
+    done
 
     return 1
 }
@@ -57,11 +75,27 @@ fetch_text() {
 download_file() {
     local url="$1"
     local output="$2"
-    if command -v curl >/dev/null 2>&1; then
-        curl -fL --connect-timeout 10 --max-time 180 "$url" -o "$output"
-        return $?
-    fi
-    wget -O "$output" "$url"
+    local i target proxy
+
+    proxy="$(proxy_url "$url")"
+    for target in "$url" "$proxy"; do
+        for i in 1 2 3; do
+            rm -f "$output"
+            if command -v curl >/dev/null 2>&1; then
+                if curl -fL --connect-timeout 10 --max-time 180 "$target" -o "$output"; then
+                    return 0
+                fi
+            elif command -v wget >/dev/null 2>&1; then
+                if wget -O "$output" "$target"; then
+                    return 0
+                fi
+            fi
+            sleep 2
+        done
+        echo -e "${YELLOW}当前下载链路失败：$target${NC}" >&2
+    done
+
+    return 1
 }
 
 get_openwrt_arch() {
