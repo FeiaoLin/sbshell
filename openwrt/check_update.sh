@@ -12,17 +12,17 @@ SINGBOX_BIN="/usr/bin/sing-box"
 MODE_FILE="/etc/sing-box/mode.conf"
 
 if [ "$(id -u)" != "0" ]; then
-    echo -e "${RED}閿欒: 璇蜂娇鐢?root 杩愯璇ヨ剼鏈?{NC}"
+    echo -e "${RED}错误：请使用 root 运行该脚本。${NC}"
     exit 1
 fi
 
 if ! grep -qi 'openwrt' /etc/os-release 2>/dev/null; then
-    echo -e "${RED}浠呮敮鎸?OpenWrt 绯荤粺鎵ц鍗囩骇銆?{NC}"
+    echo -e "${RED}错误：仅支持 OpenWrt 系统。${NC}"
     exit 1
 fi
 
 if ! command -v opkg >/dev/null 2>&1; then
-    echo -e "${RED}鏈娴嬪埌 opkg锛屾棤娉曟墽琛屽崌绾с€?{NC}"
+    echo -e "${RED}错误：未检测到 opkg。${NC}"
     exit 1
 fi
 
@@ -95,7 +95,7 @@ install_singbox_ipk() {
     fi
 
     if grep -q "pkg_hash_check_unresolved" "$log"; then
-        echo -e "${YELLOW}妫€娴嬪埌渚濊禆瑙ｆ瀽澶辫触锛屽皾璇?--force-depends 缁х画瀹夎 sing-box...${NC}"
+        echo -e "${YELLOW}检测到依赖解析失败，尝试 --force-depends 安装...${NC}"
         opkg install --force-depends "$pkg_path" >>"$log" 2>&1 && return 0
     fi
 
@@ -115,7 +115,7 @@ rollback_kmod() {
     [ -n "$backup_ipk" ] || return 1
     [ -f "$backup_ipk" ] || return 1
 
-    echo -e "${YELLOW}姝ｅ湪鍥為€€ kmod-nft-queue...${NC}"
+    echo -e "${YELLOW}正在回退 kmod-nft-queue...${NC}"
     opkg install --force-downgrade "$backup_ipk" >/tmp/kmod-rollback.log 2>&1
 }
 
@@ -142,19 +142,19 @@ backup_kmod_ipk() {
 prompt_rollback() {
     local target="$1"
     local answer
-    read -rp "妫€娴嬪埌寮傚父锛屾槸鍚﹀洖閫€ ${target}?(y/n): " answer
+    read -rp "检测到异常，是否回退 ${target}?(y/n): " answer
     [[ "$answer" =~ ^[Yy]$ ]]
 }
 
 openwrt_arch="$(get_openwrt_arch)"
 if [ -z "$openwrt_arch" ]; then
-    echo -e "${RED}鏃犳硶璇嗗埆褰撳墠 OpenWrt 鏋舵瀯銆?{NC}"
+    echo -e "${RED}错误：无法识别当前 OpenWrt 架构。${NC}"
     exit 1
 fi
 
-echo -e "${CYAN}姝ｅ湪鏇存柊杞欢鍖呯储寮?..${NC}"
+echo -e "${CYAN}正在更新软件包索引...${NC}"
 if ! opkg update >/tmp/sbshell-opkg-update.log 2>&1; then
-    echo -e "${YELLOW}opkg update 澶辫触锛屽皢缁х画浣跨敤褰撳墠绱㈠紩銆?{NC}"
+    echo -e "${YELLOW}opkg update 失败，继续使用当前索引。${NC}"
 fi
 
 current_singbox_ver=""
@@ -163,16 +163,16 @@ if command -v sing-box >/dev/null 2>&1; then
 fi
 kmod_installed_ver="$(pkg_installed_version kmod-nft-queue)"
 
-echo -e "${CYAN}姝ｅ湪妫€鏌?sing-box 鏈€鏂扮増鏈?..${NC}"
+echo -e "${CYAN}正在检查 sing-box 最新版本...${NC}"
 release_json="$(fetch_text "$API_URL")"
 if [ -z "$release_json" ]; then
-    echo -e "${RED}鑾峰彇鐗堟湰淇℃伅澶辫触锛岃妫€鏌ョ綉缁滆繛閫氭€с€?{NC}"
+    echo -e "${RED}获取版本信息失败，请检查网络连通性。${NC}"
     exit 1
 fi
 
 latest_tag="$(echo "$release_json" | sed -n 's/.*"tag_name":[[:space:]]*"\([^"]*\)".*/\1/p')"
 if [ -z "$latest_tag" ]; then
-    echo -e "${RED}瑙ｆ瀽鏈€鏂扮増鏈け璐ワ紝GitHub API 杩斿洖寮傚父銆?{NC}"
+    echo -e "${RED}解析 GitHub 最新版本失败。${NC}"
     exit 1
 fi
 latest_singbox_ver="${latest_tag#v}"
@@ -184,7 +184,7 @@ asset_urls="$(echo "$release_json" \
 asset_url="$(echo "$asset_urls" | grep -F "_openwrt_${openwrt_arch}.ipk" | head -n1)"
 
 if [ -z "$asset_url" ]; then
-    echo -e "${YELLOW}鏈€鏂板彂甯冧腑娌℃湁鍖归厤褰撳墠鏋舵瀯(${openwrt_arch})鐨?OpenWrt 瀹夎鍖咃紝鍙栨秷鏇存柊銆?{NC}"
+    echo -e "${YELLOW}未找到匹配架构 ${openwrt_arch} 的 OpenWrt 安装包，跳过更新。${NC}"
     exit 0
 fi
 
@@ -198,18 +198,17 @@ if pkg_has_upgrade kmod-nft-queue; then
     kmod_need_update=1
 fi
 
-echo -e "${CYAN}褰撳墠鏋舵瀯: ${openwrt_arch}${NC}"
-echo -e "${CYAN}sing-box: ${current_singbox_ver:-鏈畨瑁厎 -> ${latest_singbox_ver}${NC}"
-echo -e "${CYAN}kmod-nft-queue: ${kmod_installed_ver:-鏈畨瑁厎${NC}"
+echo -e "${CYAN}当前架构: ${openwrt_arch}${NC}"
+echo -e "${CYAN}sing-box: ${current_singbox_ver:-未安装} -> ${latest_singbox_ver}${NC}"
+echo -e "${CYAN}kmod-nft-queue: ${kmod_installed_ver:-未安装}${NC}"
 if [ "$kmod_need_update" -eq 0 ]; then
-    echo -e "${CYAN}kmod-nft-queue 鏃犲彲鐢ㄦ洿鏂?{NC}"
+    echo -e "${CYAN}kmod-nft-queue：无可用更新。${NC}"
 else
-    echo -e "${CYAN}kmod-nft-queue 妫€娴嬪埌鍙敤鏇存柊${NC}"
+    echo -e "${CYAN}kmod-nft-queue：检测到可用更新。${NC}"
 fi
 
-# 5. 鍧囨棤鏇存柊
 if [ "$singbox_need_update" -eq 0 ] && [ "$kmod_need_update" -eq 0 ]; then
-    echo -e "${GREEN}sing-box 涓?kmod-nft-queue 鍧囦负鏈€鏂帮紝鏃犻渶鎿嶄綔銆?{NC}"
+    echo -e "${GREEN}当前无需更新。${NC}"
     exit 0
 fi
 
@@ -227,19 +226,18 @@ fi
 
 kmod_backup=""
 if [ "$kmod_need_update" -eq 1 ]; then
-    # 4. kmod-only 闇€瑕佸彲鍥為€€淇濋殰
     if [ "$singbox_need_update" -eq 0 ]; then
         kmod_backup="$(backup_kmod_ipk "$kmod_installed_ver")"
         if [ -z "$kmod_backup" ]; then
-            echo -e "${RED}kmod-nft-queue 瀛樺湪鏇存柊锛屼絾鏃犳硶鍑嗗鍥為€€鍖咃紝宸蹭腑姝㈠崌绾т互閬垮厤涓嶅彲鍥為€€椋庨櫓銆?{NC}"
+            echo -e "${RED}kmod-nft-queue 有更新，但无法准备回退包，已中止升级。${NC}"
             [ "$was_running" -eq 1 ] && /etc/init.d/sing-box start >/dev/null 2>&1
             exit 1
         fi
     fi
 
-    echo -e "${CYAN}姝ｅ湪鏇存柊 kmod-nft-queue...${NC}"
+    echo -e "${CYAN}正在更新 kmod-nft-queue...${NC}"
     if ! upgrade_kmod_queue; then
-        echo -e "${RED}kmod-nft-queue 鏇存柊澶辫触銆?{NC}"
+        echo -e "${RED}kmod-nft-queue 更新失败。${NC}"
         [ "$was_running" -eq 1 ] && /etc/init.d/sing-box start >/dev/null 2>&1
         exit 1
     fi
@@ -249,24 +247,24 @@ if [ "$singbox_need_update" -eq 1 ]; then
     pkg_name="$(basename "$asset_url")"
     pkg_path="$WORK_DIR/$pkg_name"
 
-    echo -e "${CYAN}鍖归厤鍒?sing-box 瀹夎鍖? ${pkg_name}${NC}"
-    echo -e "${CYAN}寮€濮嬩笅杞?..${NC}"
+    echo -e "${CYAN}匹配到安装包: ${pkg_name}${NC}"
+    echo -e "${CYAN}开始下载...${NC}"
     if ! download_file "$asset_url" "$pkg_path"; then
-        echo -e "${RED}涓嬭浇 sing-box 瀹夎鍖呭け璐ャ€?{NC}"
+        echo -e "${RED}下载 sing-box 安装包失败。${NC}"
         [ "$was_running" -eq 1 ] && /etc/init.d/sing-box start >/dev/null 2>&1
         exit 1
     fi
 
-    echo -e "${CYAN}姝ｅ湪瀹夎 sing-box...${NC}"
+    echo -e "${CYAN}正在安装 sing-box...${NC}"
     if ! install_singbox_ipk "$pkg_path"; then
-        echo -e "${RED}sing-box 瀹夎澶辫触銆?{NC}"
+        echo -e "${RED}sing-box 安装失败。${NC}"
         if [ -n "$singbox_backup" ] && [ -f "$singbox_backup" ]; then
             if prompt_rollback "sing-box"; then
                 cp "$singbox_backup" "$SINGBOX_BIN"
                 chmod 755 "$SINGBOX_BIN"
-                echo -e "${YELLOW}宸插洖閫€鍒板崌绾у墠 sing-box 浜岃繘鍒躲€?{NC}"
+                echo -e "${YELLOW}已回退 sing-box。${NC}"
             else
-                echo -e "${YELLOW}宸茶烦杩?sing-box 鍥為€€銆?{NC}"
+                echo -e "${YELLOW}已跳过 sing-box 回退。${NC}"
             fi
         fi
         [ "$was_running" -eq 1 ] && /etc/init.d/sing-box start >/dev/null 2>&1
@@ -293,50 +291,47 @@ if [ "$was_running" -eq 1 ]; then
     fi
 fi
 
-# 3. sing-box 鏇存柊鍚庝笉鍖归厤锛屽洖閫€ sing-box
 if [ "$singbox_need_update" -eq 1 ] && [ "$new_singbox_ver" != "$latest_singbox_ver" ]; then
-    echo -e "${RED}sing-box 鐩爣鐗堟湰 ${latest_singbox_ver} 鏈敓鏁堬紝褰撳墠 ${new_singbox_ver:-鏈煡}銆?{NC}"
+    echo -e "${RED}sing-box 目标版本 ${latest_singbox_ver} 未生效，当前 ${new_singbox_ver:-未知}。${NC}"
     if [ -n "$singbox_backup" ] && [ -f "$singbox_backup" ]; then
         if prompt_rollback "sing-box"; then
             cp "$singbox_backup" "$SINGBOX_BIN"
             chmod 755 "$SINGBOX_BIN"
             [ "$was_running" -eq 1 ] && /etc/init.d/sing-box restart >/dev/null 2>&1
-            echo -e "${YELLOW}宸插洖閫€鍒板崌绾у墠 sing-box 鐗堟湰銆?{NC}"
+            echo -e "${YELLOW}已回退 sing-box。${NC}"
         else
-            echo -e "${YELLOW}宸茶烦杩?sing-box 鍥為€€銆?{NC}"
+            echo -e "${YELLOW}已跳过 sing-box 回退。${NC}"
         fi
     fi
     exit 1
 fi
 
-# 4. kmod-only 鏇存柊鍚庤繍琛屽け璐ワ紝鍥為€€ kmod
 if [ "$kmod_need_update" -eq 1 ] && [ "$singbox_need_update" -eq 0 ]; then
     if [ "$health_ok" -ne 0 ]; then
-        echo -e "${RED}kmod-nft-queue 鏇存柊鍚庤繍琛屽仴搴锋鏌ュけ璐ャ€?{NC}"
+        echo -e "${RED}kmod-nft-queue 更新后健康检查失败。${NC}"
         if prompt_rollback "kmod-nft-queue"; then
             if rollback_kmod "$kmod_backup"; then
                 [ "$was_running" -eq 1 ] && /etc/init.d/sing-box restart >/dev/null 2>&1
-                echo -e "${YELLOW}宸插洖閫€ kmod-nft-queue銆?{NC}"
+                echo -e "${YELLOW}已回退 kmod-nft-queue。${NC}"
             fi
         else
-            echo -e "${YELLOW}宸茶烦杩?kmod-nft-queue 鍥為€€銆?{NC}"
+            echo -e "${YELLOW}已跳过 kmod-nft-queue 回退。${NC}"
         fi
         exit 1
     fi
 fi
 
-# 1 / 2. 升级并可用
 if [ "$was_running" -eq 1 ] && [ "$health_ok" -ne 0 ]; then
-    echo -e "${RED}鍗囩骇鍚庢湇鍔″仴搴锋鏌ュけ璐ワ紝璇锋墽琛? logread -e sing-box${NC}"
+    echo -e "${RED}升级后健康检查失败，请执行：logread -e sing-box${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}鍗囩骇瀹屾垚銆傚綋鍓?sing-box 鐗堟湰: ${new_singbox_ver:-鏈煡}${NC}"
+echo -e "${GREEN}升级完成，当前 sing-box 版本：${new_singbox_ver:-未知}${NC}"
 if [ "$kmod_need_update" -eq 1 ]; then
     if [ "$final_kmod_upgradable" -eq 0 ]; then
-        echo -e "${GREEN}kmod-nft-queue 宸叉洿鏂般€?{NC}"
+        echo -e "${GREEN}kmod-nft-queue 已更新。${NC}"
     else
-        echo -e "${YELLOW}kmod-nft-queue 鍙兘浠嶆湁鍙崌绾ч」锛岃鎵嬪姩纭銆?{NC}"
+        echo -e "${YELLOW}kmod-nft-queue 可能仍有可升级项，请手动确认。${NC}"
     fi
 fi
 
