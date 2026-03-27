@@ -24,7 +24,7 @@ while true; do
     # 选择模式
     read -rp "请选择模式(1: TProxy 模式, 2: TUN 模式): " mode_choice
 
-    /etc/init.d/sing-box stop
+    /etc/init.d/sing-box stop >/dev/null 2>&1 || true
 
     case $mode_choice in
         1)

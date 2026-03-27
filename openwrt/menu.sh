@@ -2,7 +2,7 @@
 
 #################################################
 # 描述: OpenWRT 官方sing-box 全自动脚本
-# 版本: 2.1.0
+# 版本: 2.1.2
 #################################################
 
 # 定义颜色
@@ -41,6 +41,7 @@ SCRIPTS=(
     "commands.sh"              # 常用命令
     "switch_mode.sh"           # 切换代理模式
     "manage_autostart.sh"      # 设置自启动
+    "check_update.sh"          # 升级 Sing-box 内核
     "check_config.sh"          # 检查配置文件
     "update_scripts.sh"        # 更新脚本
     "update_ui.sh"             # 控制面板安装/更新/检查
@@ -64,7 +65,7 @@ download_script() {
         fi
     done
 
-    echo -e "${RED}下载 $SCRIPT 失败，请检查网络连接。${NC}"
+    echo -e "${RED}无效的选择${NC}"
     return 1
 }
 
@@ -93,12 +94,12 @@ check_and_download_scripts() {
         echo -e "${CYAN}正在下载脚本，请耐心等待...${NC}"
         for SCRIPT in "${missing_scripts[@]}"; do
             download_script "$SCRIPT" || {
-                echo -e "${RED}下载 $SCRIPT 失败，是否重试？(y/n): ${NC}"
+                echo -e "${RED}无效的选择${NC}"
                 read -r retry_choice
                 if [[ "$retry_choice" =~ ^[Yy]$ ]]; then
                     download_script "$SCRIPT"
                 else
-                    echo -e "${RED}跳过 $SCRIPT 下载。${NC}"
+                    echo -e "${RED}无效的选择${NC}"
                 fi
             }
         done
@@ -168,11 +169,43 @@ show_menu() {
     echo -e "${GREEN}6. 默认参数设置${NC}"
     echo -e "${GREEN}7. 设置自启动${NC}"
     echo -e "${GREEN}8. 常用命令${NC}"
-    echo -e "${GREEN}9. 更新脚本${NC}"
-    echo -e "${GREEN}10. 更新控制面板${NC}"
-    echo -e "${GREEN}11. 卸载整个脚本${NC}"
+    echo -e "${GREEN}9. 检查更新${NC}"
+    echo -e "${GREEN}10. 卸载整个脚本${NC}"
     echo -e "${GREEN}0. 退出${NC}"
     echo -e "${CYAN}=======================================${NC}"
+}
+
+show_update_menu() {
+    echo -e "${CYAN}============= 检查更新 =============${NC}"
+    echo -e "${GREEN}1. 更新脚本${NC}"
+    echo -e "${GREEN}2. 更新控制面板${NC}"
+    echo -e "${GREEN}3. 更新sing-box内核${NC}"
+    echo -e "${GREEN}0. 返回上级菜单${NC}"
+    echo -e "${CYAN}====================================${NC}"
+}
+
+handle_update_choice() {
+    while true; do
+        show_update_menu
+        read -rp "请选择操作: " update_choice
+        case $update_choice in
+            1)
+                bash "$SCRIPT_DIR/update_scripts.sh"
+                ;;
+            2)
+                bash "$SCRIPT_DIR/update_ui.sh"
+                ;;
+            3)
+                bash "$SCRIPT_DIR/check_update.sh"
+                ;;
+            0)
+                break
+                ;;
+            *)
+                echo -e "${RED}无效的选择${NC}"
+                ;;
+        esac
+    done
 }
 
 handle_choice() {
@@ -205,12 +238,9 @@ handle_choice() {
             bash "$SCRIPT_DIR/commands.sh"
             ;;
         9)
-            bash "$SCRIPT_DIR/update_scripts.sh"
+            handle_update_choice
             ;;
         10)
-            bash "$SCRIPT_DIR/update_ui.sh"
-            ;;
-        11)
             bash "$SCRIPT_DIR/uninstall.sh"
             exit 0
             ;;

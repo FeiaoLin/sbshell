@@ -92,6 +92,7 @@ SCRIPTS=(
     "commands.sh"
     "switch_mode.sh"
     "manage_autostart.sh"
+    "check_update.sh"
     "check_config.sh"
     "update_scripts.sh"
     "update_ui.sh"
