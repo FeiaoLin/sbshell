@@ -43,7 +43,7 @@ fetch_text() {
 
     proxy="$(proxy_url "$url")"
 
-    for target in "$url" "$proxy"; do
+    for target in "$proxy" "$url"; do
         if command -v curl >/dev/null 2>&1; then
             for i in 1 2 3; do
                 body="$(curl -sSL -H "Accept: application/vnd.github+json" -H "User-Agent: sbshell/$i" -w $'\n%{http_code}' "$target")"
@@ -78,7 +78,7 @@ download_file() {
     local i target proxy
 
     proxy="$(proxy_url "$url")"
-    for target in "$url" "$proxy"; do
+    for target in "$proxy" "$url"; do
         for i in 1 2 3; do
             rm -f "$output"
             if command -v curl >/dev/null 2>&1; then
