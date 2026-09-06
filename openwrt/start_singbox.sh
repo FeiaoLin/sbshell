@@ -45,16 +45,27 @@ start_singbox() {
         echo -e "${CYAN}当前网络环境非代理网络，可以启动 sing-box。${NC}"
     fi
 
+    local attempt ok i
     for attempt in 1 2; do
         if [ "$attempt" -eq 1 ]; then
             /etc/init.d/sing-box start >/dev/null 2>&1
         else
+            echo -e "${CYAN}首次健康检查未通过，重启并再次预热...${NC}"
             /etc/init.d/sing-box restart >/dev/null 2>&1
         fi
 
-        sleep 2
+        # 预热等待：给 sing-box 时间下载规则集、解析节点域名并完成首次延迟测试，
+        # 避免 urltest 尚未选定节点导致健康检查误报
+        ok=1
+        for i in 1 2 3 4 5 6 7 8 9 10; do
+            if check_runtime_health; then
+                ok=0
+                break
+            fi
+            sleep 3
+        done
 
-        if check_runtime_health; then
+        if [ "$ok" -eq 0 ]; then
             echo -e "${GREEN}sing-box 启动成功，运行状态正常${NC}"
             mode=$(check_mode)
             echo -e "${MAGENTA}当前启动模式: ${mode}${NC}"
